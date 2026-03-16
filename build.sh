@@ -2,21 +2,17 @@
 set -e
 npx @opennextjs/cloudflare build
 
-# Copy all files (including hidden ones) from .open-next to .open-next/assets
 cd .open-next
-shopt -s dotglob  # Include hidden files
-for item in *; do
-  if [ "$item" != "assets" ]; then
-    echo "Copying $item to assets/"
-    cp -r "$item" "assets/$item"
+
+# Copy all runtime dirs into assets so _worker.js can resolve relative imports
+for dir in .build cache cloudflare cloudflare-templates dynamodb-provider middleware server-functions; do
+  if [ -d "$dir" ]; then
+    cp -r "$dir" "assets/$dir"
+    echo "Copied $dir"
   fi
 done
 
-# Rename worker.js to _worker.js
-if [ -f assets/worker.js ]; then
-  mv assets/worker.js assets/_worker.js
-  echo "Renamed worker.js to _worker.js"
-fi
-
-echo "Build output ready in .open-next/assets"
-ls -la assets/
+# Rename worker.js -> _worker.js inside assets
+cp worker.js assets/_worker.js
+echo "Done. assets/ contents:"
+ls assets/
