@@ -2,10 +2,12 @@
 set -e
 npx @opennextjs/cloudflare build
 
-# Copy all non-assets files into assets dir so _worker.js can resolve them
+# Copy all files (including hidden ones) from .open-next to .open-next/assets
 cd .open-next
+shopt -s dotglob  # Include hidden files
 for item in *; do
   if [ "$item" != "assets" ]; then
+    echo "Copying $item to assets/"
     cp -r "$item" "assets/$item"
   fi
 done
@@ -17,3 +19,4 @@ if [ -f assets/worker.js ]; then
 fi
 
 echo "Build output ready in .open-next/assets"
+ls -la assets/
